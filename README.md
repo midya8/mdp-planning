@@ -1,6 +1,6 @@
-# BellmanLab
+# Mdp planning
 
-BellmanLab plans in small supplied discounted Markov decision processes. Inspect
+Mdp planning plans in small supplied discounted Markov decision processes. Inspect
 exact values and stopping certificates, rectangular scenario uncertainty, or
 stationary randomized policies under one or two expected-cost budgets. Python
 3.10+, standard library only. The dynamics are supplied, not learned from samples.
@@ -10,14 +10,14 @@ stationary randomized policies under one or two expected-cost budgets. Python
 | Is the value accurate enough to stop? | [Residual example](#a-small-residual-can-hide-a-large-value-error) | A raw residual is not a value-error tolerance. |
 | What changes under scenario uncertainty? | [Rectangular planning](#finite-scenario-rectangular-robust-planning) | Nature may choose a different scenario row at each state/action. |
 | Has each proposed policy actually been evaluated? | [Nested policy iteration](#exact-nested-controller-and-adversary-policy-iteration) | Inner and outer caps have different meanings. |
-| How does one budget change the policy? | [One-budget inspector](https://midya8.github.io/bellmanlab/) | Episode mixtures are not local-row averages. |
-| Can one policy meet two budgets at once? | [Two-budget inspector](https://midya8.github.io/bellmanlab/coupled.html) | Expected-cost bounds are not per-trajectory guarantees. |
+| How does one budget change the policy? | [One-budget inspector](https://midya8.github.io/mdp-planning/) | Episode mixtures are not local-row averages. |
+| Can one policy meet two budgets at once? | [Two-budget inspector](https://midya8.github.io/mdp-planning/coupled.html) | Expected-cost bounds are not per-trajectory guarantees. |
 
 ![Bellman residual, certified value error and actual value error on the same scale](assets/bellman-audit.svg)
 
 ## The policy between the policies: one expected-cost budget
 
-[Interactive exact occupancy inspector](https://midya8.github.io/bellmanlab/) · [Contract, derivation and inspected source ledger](OCCUPANCY.md)
+[Interactive exact occupancy inspector](https://midya8.github.io/mdp-planning/) · [Contract, derivation and inspected source ledger](OCCUPANCY.md)
 
 An equal initial mixture of "wait forever" and "exit now" policies is **not** a half-exit stationary policy. The two policies visit the decision state at different rates. In the default model their equal mixture has state0mass3/4 and exit occupancy1/4, so the equivalent local exit probability is1/3. Directly averaging the local rows gives cost1/3 and violates the normalized budget1/4. A separate one-state control gives a randomized optimum strictly better than every feasible deterministic policy; a tied correct Lagrange multiplier still needs a feasible primal mixture.
 
@@ -36,9 +36,9 @@ This is a supplied discounted finite model with **one normalized expected-cost c
 
 ## Two budgets. One policy.
 
-[Two-budget full-occupancy inspector](https://midya8.github.io/bellmanlab/coupled.html) · [Contract, derivation, checks and sources](COUPLED.md)
+[Two-budget full-occupancy inspector](https://midya8.github.io/mdp-planning/coupled.html) · [Contract, derivation, checks and sources](COUPLED.md)
 
-BellmanLab 0.5 adds a separate exact workflow for **two simultaneous normalized expected-cost bounds**. It retains every full feasible state/action occupancy vertex, even when different occupancies have identical cost/reward projections, then extracts a stationary randomized policy and checks a matching two-price dual bound. A jointly impossible pair gets a weighted minimum-cost separating certificate, not a failed deterministic search or fake plan.
+Mdp planning 0.5 adds a separate exact workflow for **two simultaneous normalized expected-cost bounds**. It retains every full feasible state/action occupancy vertex, even when different occupancies have identical cost/reward projections, then extracts a stationary randomized policy and checks a matching two-price dual bound. A jointly impossible pair gets a weighted minimum-cost separating certificate, not a failed deterministic search or fake plan.
 
 The default's three actions have `(reward,cost0,cost1)=(0,0,0),(3,1,0),(2,0,1)`. Budgets `1/3,1/4` require optimal weights `5/12,1/3,1/4`: reward `3/2`, versus 0 for the best feasible deterministic policy. No pair of deterministic policies attains that optimum. Another control has separately attainable budgets that are jointly impossible, with an exact separating gap `1/6`. The route control distinguishes a three-policy episode mixture from visit-reweighted local probabilities; direct row averaging violates both budgets.
 
@@ -67,7 +67,7 @@ The directly specified one-state model has reward 1/100, discount 99/100 and a s
 | Certified value-error upper bound | 1 | No |
 | Actual value error, independently known | 1 | No |
 
-For the optimality operator T, the contraction certificate is `||v-v*||_infinity <= ||Tv-v||_infinity/(1-discount)`. A residual is not an interchangeable value-error tolerance. BellmanLab gates the bound. With synchronous backups, 230 sweeps bring that certified error below 1/10; the initial audit and all 230 subsequent audits are returned. The demo asserts the initially passing raw-residual test, failing certified-error test and eventually passing certified-error test. This constructed example is not a convergence-rate benchmark or a statistical confidence interval.
+For the optimality operator T, the contraction certificate is `||v-v*||_infinity <= ||Tv-v||_infinity/(1-discount)`. A residual is not an interchangeable value-error tolerance. Mdp planning gates the bound. With synchronous backups, 230 sweeps bring that certified error below 1/10; the initial audit and all 230 subsequent audits are returned. The demo asserts the initially passing raw-residual test, failing certified-error test and eventually passing certified-error test. This constructed example is not a convergence-rate benchmark or a statistical confidence interval.
 
 A separate three-state model contrasts immediate reward with delayed return. At state zero, action zero pays 1 then moves to a zero-reward absorbing state. Action one pays 0 then reaches a state paying 1/5 forever. With discount 9/10, the immediate policy has start value 1, while exact policy iteration chooses the delayed action and returns 9/5. Both use the same complete supplied model. The fixture does not measure sample efficiency or generalize to an unknown environment.
 
